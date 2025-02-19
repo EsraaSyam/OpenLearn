@@ -10,7 +10,11 @@ export class RegisterRequest {
 
     @IsNotEmpty()
     @IsNotNullOrUndefined()
-    name: string;
+    first_name: string;
+
+    @IsNotEmpty()
+    @IsNotNullOrUndefined()
+    last_name: string;
 
     @MinLength(6)
     @MaxLength(30)

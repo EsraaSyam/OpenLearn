@@ -31,8 +31,7 @@ export class UserService {
         return user;
     }
 
-    async create(data: any) {
-        const user = this.userRepository.create(data);
+    async create(user: any) {
         return await this.userRepository.save(user);
     }
 }

@@ -24,12 +24,12 @@ export class AuthService {
     }
 
     async hashPassword(password: string): Promise<string> {
-        const saltRounds = 10;
+        const saltRounds = Number(process.env.SALT_ROUNDS);
         return await bcrypt.hash(password, saltRounds);
     }
 
-    async validatePassword(password: string, hashedPassword: string): Promise<boolean> {
-        return await bcrypt.compare(password, hashedPassword);
+    async comparePasswords(password: string, storedHashedPassword: string): Promise<boolean> {
+        return await bcrypt.compare(password, storedHashedPassword);
     }
 
 }
