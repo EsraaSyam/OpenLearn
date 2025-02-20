@@ -3,10 +3,14 @@ import { UserService } from 'src/user/user.service';
 import { RegisterRequest } from './requests/register.request';
 import { UserAlreadyExistException } from './exceptions/user-is-already-exist.exception';
 import * as bcrypt from 'bcrypt';
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class AuthService {
-    constructor(private readonly userService: UserService) { }
+    constructor(
+        private readonly userService: UserService,
+        private readonly configService: ConfigService
+    ) { }
 
     async registerUser(data: RegisterRequest) {
         const existingUser = await this.userService.findByEmail(data.email);
@@ -24,7 +28,7 @@ export class AuthService {
     }
 
     async hashPassword(password: string): Promise<string> {
-        const saltRounds = Number(process.env.SALT_ROUNDS);
+        const saltRounds = Number(this.configService.get("SALT_ROUNDS"));
         return await bcrypt.hash(password, saltRounds);
     }
 
