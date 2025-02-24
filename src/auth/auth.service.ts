@@ -6,8 +6,9 @@ import * as bcrypt from 'bcrypt';
 import { ConfigService } from "@nestjs/config";
 import { LoginRequest } from './requests/login.request';
 import { UserNotFoundException } from 'src/user/exceptions/user-not-found.exception';
-import { NotValidEmailOrPasswordException } from './exceptions/not-valid-email-or-pass.exception';
 import { JwtService } from '@nestjs/jwt';
+import { InvalidPasswordException } from './exceptions/invalid-password.exception';
+import { EmailNotFoundException } from './exceptions/email-not-found.exception';
 
 @Injectable()
 export class AuthService {
@@ -41,20 +42,24 @@ export class AuthService {
         return await bcrypt.compare(password, storedHashedPassword);
     }
 
-    async login(data: LoginRequest): Promise<{ token: string, data: any }> {
+    createToken(id: number, email: string): string {
+        return this.jwtService.sign({ id, email });
+    }
+
+    async login(data: LoginRequest): Promise<string> {
         const user = await this.userService.findByEmail(data.email);
+
+        if (!user) {
+            throw new EmailNotFoundException();
+        }
+
         const isPasswordMatches = await this.isPasswordMatches(data.password, user.password);
 
-        if (!user || !isPasswordMatches) {
-            throw new NotValidEmailOrPasswordException();
+        if (!isPasswordMatches) {
+            throw new InvalidPasswordException();
         }
-
-        const token = this.jwtService.sign({ id: user.id, email: user.email });
-
-        return {
-            token,
-            data: user,
-        }
+        
+        return this.createToken(user.id, user.email);
     }
 
 }

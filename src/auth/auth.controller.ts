@@ -20,11 +20,10 @@ export class AuthController {
 
     @Post('login')
     async login(@Body() data: LoginRequest, @Res() res: Response) {
-        const userData = await this.authService.login(data);
+        const token = await this.authService.login(data);
         return res.status(200).json({
             message: 'User has been logged in successfully',
-            data: new UserResponse(userData.data),
-            token: userData.token,
+            token: token,
         });
     }
 
