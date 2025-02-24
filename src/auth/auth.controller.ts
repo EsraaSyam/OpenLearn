@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { RegisterRequest } from './requests/register.request';
 import { Response } from 'express';
 import { UserResponse } from './responses/user.response';
+import { LoginRequest } from './requests/login.request';
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +15,15 @@ export class AuthController {
         return res.status(201).json({
             message: 'User has been created successfully',
             data: new UserResponse(user),
+        });
+    }
+
+    @Post('login')
+    async login(@Body() data: LoginRequest, @Res() res: Response) {
+        const token = await this.authService.login(data);
+        return res.status(200).json({
+            message: 'User has been logged in successfully',
+            token: token,
         });
     }
 

@@ -1,15 +1,21 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { RegisterRequest } from './requests/register.request';
 import { UserAlreadyExistException } from './exceptions/user-is-already-exist.exception';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from "@nestjs/config";
+import { LoginRequest } from './requests/login.request';
+import { UserNotFoundException } from 'src/user/exceptions/user-not-found.exception';
+import { JwtService } from '@nestjs/jwt';
+import { InvalidPasswordException } from './exceptions/invalid-password.exception';
+import { EmailNotFoundException } from './exceptions/email-not-found.exception';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly userService: UserService,
-        private readonly configService: ConfigService
+        private readonly configService: ConfigService,
+        private readonly jwtService: JwtService,
     ) { }
 
     async registerUser(data: RegisterRequest) {
@@ -34,6 +40,26 @@ export class AuthService {
 
     async isPasswordMatches(password: string, storedHashedPassword: string): Promise<boolean> {
         return await bcrypt.compare(password, storedHashedPassword);
+    }
+
+    createToken(id: number, email: string): string {
+        return this.jwtService.sign({ id, email });
+    }
+
+    async login(data: LoginRequest): Promise<string> {
+        const user = await this.userService.findByEmail(data.email);
+
+        if (!user) {
+            throw new EmailNotFoundException();
+        }
+
+        const isPasswordMatches = await this.isPasswordMatches(data.password, user.password);
+
+        if (!isPasswordMatches) {
+            throw new InvalidPasswordException();
+        }
+        
+        return this.createToken(user.id, user.email);
     }
 
 }
