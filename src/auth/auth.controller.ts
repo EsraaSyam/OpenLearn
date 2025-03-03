@@ -1,10 +1,11 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterRequest } from './requests/register.request';
 import { Response } from 'express';
 import { UserResponse } from './responses/user.response';
 import { LoginRequest } from './requests/login.request';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -31,6 +32,20 @@ export class AuthController {
     @ApiResponse({ status: 400, description: 'Bad request' })
     async login(@Body() data: LoginRequest, @Res() res: Response) {
         const token = await this.authService.login(data);
+        return res.status(200).json({
+            message: 'User has been logged in successfully',
+            token: token,
+        });
+    }
+
+    @Get('google/login')
+    @UseGuards(AuthGuard('google'))
+    async googleAuth() {}
+
+    @Get('google/callback')
+    @UseGuards(AuthGuard('google'))
+    async googleAuthCallback(@Req() req, @Res() res: Response) {
+        const token = await this.authService.handleGoogleUser(req.user);
         return res.status(200).json({
             message: 'User has been logged in successfully',
             token: token,

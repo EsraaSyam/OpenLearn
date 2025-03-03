@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Max, MaxLength, MinLength } from "class-validator";
+import { IsEmail, IsNotEmpty, IsOptional, IsString, Max, MaxLength, MinLength, ValidateIf } from "class-validator";
 import { Roles } from "src/user/enums/rols.enum";
 import { IsAlpha } from "src/validators/is-alpha.decorator";
 import { IsNotNullOrUndefined } from "src/validators/Is-not-null-or-undefined.decorator";
@@ -29,10 +29,14 @@ export class RegisterRequest {
     @MinLength(6)
     @MaxLength(30)
     @IsNotNullOrUndefined()
+    @ValidateIf(o => !o.isOAuthUser)
     @ApiProperty({ example: 'password123', description: 'Password' })
-    password: string;
+    password?: string;
 
     @IsOptional()   
     @ApiProperty({ enum: Roles, example: Roles.USER, description: 'User role', default: Roles.USER, required: false })
     role: Roles;
+
+    @Transform(({ value }) => value ?? false)
+    isOAuthUser?: boolean;
 }

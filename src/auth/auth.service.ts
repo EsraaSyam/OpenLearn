@@ -62,4 +62,14 @@ export class AuthService {
         return this.createToken(user.id, user.email);
     }
 
+    async handleGoogleUser(user: RegisterRequest): Promise<string> {
+        const existingUser = await this.userService.findByEmail(user.email);
+
+        if (existingUser) {
+            return this.createToken(existingUser.id, existingUser.email);
+        }
+
+        return this.createToken((await this.userService.create(user)).id, user.email);
+    }
+
 }
