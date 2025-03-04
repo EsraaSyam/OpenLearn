@@ -46,7 +46,7 @@ export class AuthController {
     @UseGuards(AuthGuard('google'))
     async googleAuthCallback(@Req() req, @Res() res: Response) {
         const token = await this.authService.handleGoogleUser(req.user);
-        res.redirect(`https://esraasyam.github.io/OpenLearnWebsite/register?token=${token}`);
+        res.redirect(`https://esraasyam.github.io/OpenLearnWebsite/#/register?token=${token}`);
     }
 
 }
