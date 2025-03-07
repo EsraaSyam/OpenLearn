@@ -52,9 +52,9 @@ export class AuthController {
         const token = await this.authService.handleGoogleUser(req.user);
 
         res.cookie('authToken', token, {
-            httpOnly: true, 
-            secure: true, 
-            sameSite: 'none', 
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
             maxAge: 7 * 24 * 60 * 60 * 1000,
             domain: this.configService.get<string>('COOKIE_DOMAIN'),
         });
@@ -62,4 +62,9 @@ export class AuthController {
         res.redirect(this.configService.get<string>('FRONT_URL'));
     }
 
+    @Get('profile')
+    @UseGuards(AuthGuard('jwt'))
+    async getProfile(@Req() req) {
+        return new UserResponse(req.user);
+    }
 }
