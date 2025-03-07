@@ -6,11 +6,15 @@ import { UserResponse } from './responses/user.response';
 import { LoginRequest } from './requests/login.request';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
+import { ConfigService } from '@nestjs/config';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-    constructor(private readonly authService: AuthService) { }
+    constructor(
+        private readonly authService: AuthService,
+        private readonly configService: ConfigService,
+    ) { }
 
     @Post('register')
     @ApiOperation({ summary: 'Register a new user' })
@@ -40,13 +44,22 @@ export class AuthController {
 
     @Get('google/login')
     @UseGuards(AuthGuard('google'))
-    async googleAuth() {}
+    async googleAuth() { }
 
     @Get('google/callback')
     @UseGuards(AuthGuard('google'))
     async googleAuthCallback(@Req() req, @Res() res: Response) {
         const token = await this.authService.handleGoogleUser(req.user);
-        res.redirect(`https://esraasyam.github.io/OpenLearnWebsite/#/register?token=${token}`);
+
+        res.cookie('authToken', token, {
+            httpOnly: true, 
+            secure: true, 
+            sameSite: 'none', 
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+            domain: this.configService.get<string>('COOKIE_DOMAIN'),
+        });
+
+        res.redirect(this.configService.get<string>('FRONT_URL'));
     }
 
 }
