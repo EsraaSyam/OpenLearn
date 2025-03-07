@@ -58,7 +58,9 @@ export class AuthController {
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        res.redirect("https://esraasyam.github.io/OpenLearnWebsite/");
+        console.log("FRONT_URL:", this.configService.get<string>('FRONT_URL'));
+
+        res.redirect(this.configService.get<string>('FRONT_URL'));
     }
 
     @Get('profile')
