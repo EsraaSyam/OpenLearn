@@ -58,7 +58,7 @@ export class AuthController {
             maxAge: 7 * 24 * 60 * 60 * 1000,
             domain: this.configService.get<string>('COOKIE_DOMAIN'),
         });
-
+        
         res.redirect(this.configService.get<string>('FRONT_URL'));
     }
 

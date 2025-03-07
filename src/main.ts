@@ -6,9 +6,11 @@ import { ValidationPipe } from '@nestjs/common';
 import * as cors from "cors";
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const configService = app.get(ConfigService);
 
   app.useGlobalFilters(new HttpExceptionFilter());
 
@@ -20,7 +22,11 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api/v1');
 
-  app.use(cors());
+  app.enableCors({
+    origin: configService.get<string>('FRONT_DOMAIN'),
+    credentials: true, 
+  });
+
 
   const config = new DocumentBuilder()
     .setTitle('OpenLearn API')
