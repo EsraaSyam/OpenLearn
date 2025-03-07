@@ -51,15 +51,20 @@ export class AuthController {
     async googleAuthCallback(@Req() req, @Res() res: Response) {
         const token = await this.authService.handleGoogleUser(req.user);
 
-        res.cookie('authToken', token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-            domain: this.configService.get<string>('COOKIE_DOMAIN'),
+        res.status(200).json({
+            message: 'User has been logged in successfully',
+            token: token,
         });
-        
-        res.redirect(this.configService.get<string>('FRONT_URL'));
+
+        // res.cookie('authToken', token, {
+        //     httpOnly: true,
+        //     secure: true,
+        //     sameSite: 'none',
+        //     maxAge: 7 * 24 * 60 * 60 * 1000,
+        //     domain: this.configService.get<string>('COOKIE_DOMAIN'),
+        // });
+
+        // res.redirect(this.configService.get<string>('FRONT_URL'));
     }
 
     @Get('profile')
