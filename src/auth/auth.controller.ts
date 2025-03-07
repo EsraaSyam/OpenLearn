@@ -36,9 +36,16 @@ export class AuthController {
     @ApiResponse({ status: 400, description: 'Bad request' })
     async login(@Body() data: LoginRequest, @Res() res: Response) {
         const token = await this.authService.login(data);
+
+        res.cookie('authToken', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none',
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
         return res.status(200).json({
             message: 'User has been logged in successfully',
-            token: token,
         });
     }
 
