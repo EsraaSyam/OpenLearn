@@ -72,4 +72,15 @@ export class AuthService {
         return this.createToken((await this.userService.create(user)).id, user.email);
     }
 
+    async getProfile(email: string) {
+        const user = await this.userService.findByEmail(email);
+
+        if (!user) {
+            throw new UserNotFoundException(email);
+        }
+
+        return user;
+    }
+
+
 }
