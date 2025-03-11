@@ -1,6 +1,6 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
 import { IsNotNullOrUndefined } from "src/validators/Is-not-null-or-undefined.decorator";
-import { Level } from "../enums/level.enum";
+import { CourseLevel } from "../enums/level.enum";
 
 export class CreateCourseRequest {
     @IsNotNullOrUndefined()
@@ -12,8 +12,8 @@ export class CreateCourseRequest {
     description: string;
 
     @IsNotNullOrUndefined()
-    @IsEnum(Level)
-    level: Level;
+    @IsEnum(CourseLevel)
+    level: CourseLevel;
 
     @IsNotNullOrUndefined()
     @IsNumber()

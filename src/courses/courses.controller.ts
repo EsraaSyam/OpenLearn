@@ -3,6 +3,8 @@ import { CoursesService } from './courses.service';
 import { CreateCourseRequest } from './requests/create-course.request';
 import { Response } from 'express';
 import { isValidId } from 'src/validators/is-valid-id.decorator';
+import { cp } from 'fs';
+import { FindCoursesRequest } from './requests/find-courses.request';
 
 @Controller('courses')
 export class CoursesController {
@@ -19,15 +21,9 @@ export class CoursesController {
         });
     }
 
-    @Get('all')
-    async findAll(
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 10,
-        @Query('orderBy') orderBy: string = 'title',
-        @Query('orderDirection') orderDirection: string = 'ASC',
-        @Res() res: Response
-    )  {
-        const courses = await this.coursesService.findAllCourses(page, limit, orderBy, orderDirection);
+    @Get()
+    async findAll(@Query() params: FindCoursesRequest, @Res() res: Response)  {
+        const courses = await this.coursesService.findAllCourses(params);
 
         return res.status(200).json({
             data: courses,
