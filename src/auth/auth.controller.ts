@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { RegisterRequest } from './requests/register.request';
+import { RegisterRequest } from './request/register.request';
 import { Response } from 'express';
-import { UserResponse } from './responses/user.response';
-import { LoginRequest } from './requests/login.request';
+import { UserResponse } from './response/user.response';
+import { LoginRequest } from './request/login.request';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';

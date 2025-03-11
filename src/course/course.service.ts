@@ -2,11 +2,11 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CourseEntity } from './course.entity';
 import { Repository } from 'typeorm';
-import { CourseNotFoundException } from './exceptions/course-not-found.exception';
-import { CreateCourseRequest } from './requests/create-course.request';
-import { CourseResponse } from './responses/course.response';
-import { FindCoursesRequest } from './requests/find-courses.request';
-import { FindCoursesResponse } from './responses/find-courses.response';
+import { CourseNotFoundException } from './exception/course-not-found.exception';
+import { CreateCourseRequest } from './request/create-course.request';
+import { CourseResponse } from './response/course.response';
+import { FindCoursesRequest } from './request/find-courses.request';
+import { FindCoursesResponse } from './response/find-courses.response';
 
 @Injectable()
 export class CoursesService {
@@ -15,14 +15,14 @@ export class CoursesService {
         private readonly courseRepository: Repository<CourseEntity>,
     ) { }
 
-    async findCourseById(id: number): Promise<CourseEntity> {
+    async findCourseById(id: number): Promise<CourseResponse> {
         const course = await this.courseRepository.findOneBy({ id });
 
         if (!course) {
             throw new CourseNotFoundException(id);
         }
 
-        return course;
+        return new CourseResponse(course);
     }
 
 

@@ -1,5 +1,5 @@
 import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { CourseLevel } from "./enums/level.enum";
+import { DifficultyLevel } from "./enum/level.enum";
 
 @Entity('courses')
 export class CourseEntity {
@@ -15,8 +15,8 @@ export class CourseEntity {
     @Column({ type: "decimal"})
     price: number;
 
-    @Column({ type: "enum", enum: CourseLevel })
-    level: CourseLevel;
+    @Column({ type: "enum", enum: DifficultyLevel })
+    difficultyLevel: DifficultyLevel;
 
     @CreateDateColumn()
     createdAt: Date;

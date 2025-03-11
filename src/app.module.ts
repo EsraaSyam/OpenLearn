@@ -5,9 +5,9 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { LoggerMiddleware } from './middleware/logger.middleware';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
-import { CoursesModule } from './courses/courses.module';
+import { CoursesModule } from './course/course.module';
 
 @Module({
   imports: [

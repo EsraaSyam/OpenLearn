@@ -1,14 +1,14 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
-import { RegisterRequest } from './requests/register.request';
-import { UserAlreadyExistException } from './exceptions/user-is-already-exist.exception';
+import { RegisterRequest } from './request/register.request';
+import { UserAlreadyExistException } from './exception/user-is-already-exist.exception';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from "@nestjs/config";
-import { LoginRequest } from './requests/login.request';
-import { UserNotFoundException } from 'src/user/exceptions/user-not-found.exception';
+import { LoginRequest } from './request/login.request';
+import { UserNotFoundException } from 'src/user/exception/user-not-found.exception';
 import { JwtService } from '@nestjs/jwt';
-import { InvalidPasswordException } from './exceptions/invalid-password.exception';
-import { EmailNotFoundException } from './exceptions/email-not-found.exception';
+import { InvalidPasswordException } from './exception/invalid-password.exception';
+import { EmailNotFoundException } from './exception/email-not-found.exception';
 
 @Injectable()
 export class AuthService {

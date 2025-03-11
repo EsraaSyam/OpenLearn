@@ -1,4 +1,4 @@
-export enum CourseLevel {
+export enum DifficultyLevel {
     BEGINNER = 'beginner',
     INTERMEDIATE = 'intermediate',
     ADVANCED = 'advanced'

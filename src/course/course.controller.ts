@@ -1,10 +1,10 @@
 import { Body, Controller, Get, ParseIntPipe, Post, Query, Req, Res } from '@nestjs/common';
-import { CoursesService } from './courses.service';
-import { CreateCourseRequest } from './requests/create-course.request';
+import { CoursesService } from './course.service';
+import { CreateCourseRequest } from './request/create-course.request';
 import { Response } from 'express';
-import { isValidId } from 'src/validators/is-valid-id.decorator';
+import { isValidId } from 'src/validator/is-valid-id.decorator';
 import { cp } from 'fs';
-import { FindCoursesRequest } from './requests/find-courses.request';
+import { FindCoursesRequest } from './request/find-courses.request';
 
 @Controller('courses')
 export class CoursesController {
