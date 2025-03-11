@@ -40,7 +40,8 @@ export class CoursesService {
         return new FindCoursesResponse(courses, total, page, limit);
     }
 
-    async createCourse(course: CreateCourseRequest): Promise<CourseEntity> {
-        return await this.courseRepository.save(course);
+    async createCourse(course: CreateCourseRequest): Promise<CourseResponse> {
+        const newCourse = await this.courseRepository.save(course);
+        return new CourseResponse(newCourse);
     }
 }
