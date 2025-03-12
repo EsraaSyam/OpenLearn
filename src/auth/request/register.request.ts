@@ -1,9 +1,9 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Transform } from "class-transformer";
 import { IsEmail, IsNotEmpty, IsOptional, IsString, Max, MaxLength, MinLength, ValidateIf } from "class-validator";
-import { Roles } from "src/user/enums/rols.enum";
-import { IsAlpha } from "src/validators/is-alpha.decorator";
-import { IsNotNullOrUndefined } from "src/validators/Is-not-null-or-undefined.decorator";
+import { Roles } from "src/user/enum/rols.enum";
+import { IsAlpha } from "src/validator/is-alpha.decorator";
+import { IsNotNullOrUndefined } from "src/validator/Is-not-null-or-undefined.decorator";
 
 export class RegisterRequest {
     @IsEmail()

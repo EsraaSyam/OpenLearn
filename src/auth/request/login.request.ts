@@ -1,6 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEmail, IsNotEmpty } from "class-validator";
-import { IsNotNullOrUndefined } from "src/validators/Is-not-null-or-undefined.decorator";
+import { IsNotNullOrUndefined } from "src/validator/Is-not-null-or-undefined.decorator";
 
 export class LoginRequest {
     @IsEmail()
