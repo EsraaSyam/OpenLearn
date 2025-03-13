@@ -1,12 +1,13 @@
-import { Body, Controller, Get, ParseIntPipe, Post, Query, Req, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, ParseIntPipe, Post, Put, Query, Req, Res } from '@nestjs/common';
 import { CoursesService } from './course.service';
 import { CreateCourseRequest } from './request/create-course.request';
 import { Response } from 'express';
 import { isValidId } from 'src/validator/is-valid-id.decorator';
 import { cp } from 'fs';
 import { FindCoursesRequest } from './request/find-courses.request';
+import { UpdateCourseRequest } from './request/update-course.request';
 
-@Controller('courses')
+@Controller('course')
 export class CoursesController {
     constructor(
         private readonly coursesService: CoursesService,
@@ -38,6 +39,22 @@ export class CoursesController {
         return res.status(200).json({
             data: course,
         });
+    }
+
+    @Put(':id')
+    async updateCourse(@isValidId() id: number, @Body() body: UpdateCourseRequest, @Res() res: Response) {
+        const course = await this.coursesService.updateCourse(id, body);
+
+        return res.status(200).json({
+            data: course,
+        });
+    }
+
+    @Delete(':id')
+    async softDeleteCourse(@isValidId() id: number, @Res() res: Response) {
+        await this.coursesService.softDeleteCourse(id);
+
+        return res.status(204).send();
     }
 
 }
