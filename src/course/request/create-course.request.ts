@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsEnum, IsNotEmpty, IsNumber, IsString, Min } from "class-validator";
 import { IsNotNullOrUndefined } from "src/validator/Is-not-null-or-undefined.decorator";
 import { DifficultyLevel } from "../enum/level.enum";
 
@@ -17,5 +17,6 @@ export class CreateCourseRequest {
 
     @IsNotNullOrUndefined()
     @IsNumber()
+    @Min(0)
     price: number;
 }
