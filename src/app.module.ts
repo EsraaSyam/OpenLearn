@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { CoursesModule } from './course/course.module';
+import { SectionModule } from './section/section.module';
 
 @Module({
   imports: [
@@ -30,7 +31,7 @@ import { CoursesModule } from './course/course.module';
       }),
       inject: [ConfigService],
     })
-    ,AuthModule, UserModule, CoursesModule],
+    ,AuthModule, UserModule, CoursesModule, SectionModule],
   controllers: [AppController],
   providers: [AppService],
 })
