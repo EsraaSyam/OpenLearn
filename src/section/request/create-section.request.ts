@@ -9,9 +9,5 @@ export class CreateSectionRequest {
 
     @IsNumber()
     @IsPositive()
-    order: number;
-
-    @IsNumber()
-    @IsPositive()
     courseId: number;
 }

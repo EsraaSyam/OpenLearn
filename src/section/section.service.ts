@@ -15,22 +15,18 @@ export class SectionService {
         private readonly courseService: CoursesService,
     ) { }
 
-    async ensureSectionOrderIsUnique(order: number, courseId: number): Promise<void> {
-        const section = await this.sectionRepository.findOne({ where: { order, course: { id: courseId } } });
-
-        if (section) {
-            throw new SectionAlreadyExistsException(courseId, order);
-        }
+    async sectionCount(courseId: number): Promise<number> {
+        return this.sectionRepository.count({ where: { course: { id: courseId } }});
     }
 
     async createSection(section: CreateSectionRequest): Promise<SectionResponse> {
-        const { courseId, order } = section;
+        const { courseId } = section;
 
-        await this.ensureSectionOrderIsUnique(order, courseId);
+        const sectionCount = await this.sectionCount(courseId);
 
         const course = await this.courseService.findCourseEntityById(courseId);
 
-        const newSection = await this.sectionRepository.create({ ...section, course });
+        const newSection = await this.sectionRepository.create({ ...section, course, order: sectionCount + 1 });
 
         const savedSection = await this.sectionRepository.save(newSection);
 
