@@ -15,18 +15,18 @@ export class SectionService {
         private readonly courseService: CoursesService,
     ) { }
 
-    async sectionCount(courseId: number): Promise<number> {
+    async getLastSectionInCourse(courseId: number): Promise<number> {
         return this.sectionRepository.count({ where: { course: { id: courseId } }});
     }
 
     async createSection(section: CreateSectionRequest): Promise<SectionResponse> {
         const { courseId } = section;
 
-        const sectionCount = await this.sectionCount(courseId);
+        const lastSection = await this.getLastSectionInCourse(courseId);
 
         const course = await this.courseService.findCourseEntityById(courseId);
 
-        const newSection = await this.sectionRepository.create({ ...section, course, order: sectionCount + 1 });
+        const newSection = await this.sectionRepository.create({ ...section, course, order: lastSection + 1 });
 
         const savedSection = await this.sectionRepository.save(newSection);
 
