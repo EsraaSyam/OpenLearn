@@ -1,6 +1,5 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { DifficultyLevel } from "./enum/level.enum";
-import { SectionEntity } from "src/section/section.entity";
 
 @Entity('courses')
 export class CourseEntity {
@@ -27,8 +26,5 @@ export class CourseEntity {
 
     @DeleteDateColumn({ nullable: true })
     deletedAt: Date | null;
-
-    @OneToMany(() => SectionEntity, section => section.course, { cascade: true })
-    sections: SectionEntity[];
 
 }
