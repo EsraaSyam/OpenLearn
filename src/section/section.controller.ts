@@ -1,7 +1,9 @@
-import { Body, Controller, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { SectionService } from './section.service';
 import { CreateSectionRequest } from './request/create-section.request';
 import { Response } from 'express';
+import { isValidId } from 'src/validator/is-valid-id.decorator';
+import { FindSectionRequest } from './request/find-sections.request';
 
 @Controller('section')
 export class SectionController {
@@ -19,4 +21,22 @@ export class SectionController {
         });
     }
 
+    @Get(':id')
+    async findSectionById(@isValidId() id: number, @Res() res: Response) {
+        const section = await this.sectionService.findSectionById(id);
+
+        return res.status(200).json({
+            data: section,
+        });
+    }
+
+
+    @Get()
+    async findAllSections(@Query() prams: FindSectionRequest, @Res() res: Response) {
+        const sections = await this.sectionService.findAllSections(prams);
+
+        return res.status(200).json({
+            data: sections,
+        });
+    }
 }
