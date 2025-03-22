@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SectionEntity } from './section.entity';
 import { Repository } from 'typeorm';
@@ -8,7 +8,9 @@ import { SectionAlreadyExistsException } from './exception/section-already-exist
 import { SectionResponse } from './response/section.response';
 import { FindSectionRequest } from './request/find-sections.request';
 import { FindSectionResponse } from './response/find-sections.response';
-import { SectionNotFoundException } from './exception/section-not-found.exception';
+import { SectionIdNotFoundException } from './exception/section-id-not-found.exception';
+import { UpdateSectionRequest } from './request/update-section.request';
+import { SectionOrderNotFoundException } from './exception/section-order-not-found.exception';
 
 @Injectable()
 export class SectionService {
@@ -40,10 +42,20 @@ export class SectionService {
         const section = await this.sectionRepository.findOne({ where: { id } });
 
         if (!section) {
-            throw new SectionNotFoundException(id);
+            throw new SectionIdNotFoundException(id);
         }
 
         return new SectionResponse(section);
+    }
+
+    async findSectionEntityById(id: number): Promise<SectionEntity> {
+        const section = await this.sectionRepository.findOne({ where: { id }, relations: ['course'] });
+
+        if (!section) {
+            throw new SectionIdNotFoundException(id);
+        }
+
+        return section;
     }
 
     async findAllSections(params: FindSectionRequest): Promise<FindSectionResponse> {
@@ -51,7 +63,7 @@ export class SectionService {
 
         const offset = (page - 1) * limit;
 
-        const whereClause: any = { deletedAt: null }; 
+        const whereClause: any = { deletedAt: null };
 
         if (params.courseId) {
             whereClause.course = { id: params.courseId };
@@ -69,4 +81,50 @@ export class SectionService {
     }
 
 
+    async updateSection(request: UpdateSectionRequest, id: number): Promise<SectionResponse> {
+        const { title, order } = request;
+
+        const targetSection = await this.findSectionEntityById(id);
+
+        targetSection.title = title ?? targetSection.title;
+
+        if (order && order !== targetSection.order) {
+            await this.reorderSections(targetSection, order);
+        }
+
+        const updatedSection = await this.sectionRepository.save(targetSection);
+        return new SectionResponse(updatedSection);
+    }
+
+    private async findSectionByOrder(courseId: number, order: number): Promise<SectionEntity> {
+        const section =  this.sectionRepository.findOne({ where: { course: { id: courseId }, order } });
+
+        if (!section) {
+            throw new SectionOrderNotFoundException(order);
+        }
+
+        return section;
+    }
+
+    private async reorderSections(targetSection: SectionEntity, newOrder: number): Promise<void> {
+        const courseId = targetSection.course.id;
+
+        const maxOrder = await this.getLastSectionInCourse(courseId);
+
+        if (newOrder > maxOrder) {
+            throw new BadRequestException(`New order must be between 1 and ${maxOrder}`);
+        }
+
+        const sectionToMove = targetSection; 
+        const sectionAtTargetPosition = await this.findSectionByOrder(courseId, newOrder);
+
+        await this.sectionRepository.manager.transaction(async (manager) => {
+            const tempOrder = sectionToMove.order;
+            sectionToMove.order = sectionAtTargetPosition.order;
+            sectionAtTargetPosition.order = tempOrder;
+
+            await manager.save([sectionToMove, sectionAtTargetPosition]);
+        });
+    }
 }
+

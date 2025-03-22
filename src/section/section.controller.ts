@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
+import { Body, Controller, Get, Post, Put, Query, Res } from '@nestjs/common';
 import { SectionService } from './section.service';
 import { CreateSectionRequest } from './request/create-section.request';
 import { Response } from 'express';
 import { isValidId } from 'src/validator/is-valid-id.decorator';
 import { FindSectionRequest } from './request/find-sections.request';
+import { UpdateSectionRequest } from './request/update-section.request';
 
 @Controller('section')
 export class SectionController {
@@ -37,6 +38,15 @@ export class SectionController {
 
         return res.status(200).json({
             data: sections,
+        });
+    }
+
+    @Put(':id')
+    async updateSection(@isValidId() id: number, @Body() section: UpdateSectionRequest, @Res() res: Response) {
+        const updatedSection = await this.sectionService.updateSection(section, id);
+
+        return res.status(200).json({
+            data: updatedSection,
         });
     }
 }
