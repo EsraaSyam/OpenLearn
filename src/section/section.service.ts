@@ -8,8 +8,9 @@ import { SectionAlreadyExistsException } from './exception/section-already-exist
 import { SectionResponse } from './response/section.response';
 import { FindSectionRequest } from './request/find-sections.request';
 import { FindSectionResponse } from './response/find-sections.response';
-import { SectionNotFoundException } from './exception/section-not-found.exception';
+import { SectionIdNotFoundException } from './exception/section-id-not-found.exception';
 import { UpdateSectionRequest } from './request/update-section.request';
+import { SectionOrderNotFoundException } from './exception/section-order-not-found.exception';
 
 @Injectable()
 export class SectionService {
@@ -41,7 +42,7 @@ export class SectionService {
         const section = await this.sectionRepository.findOne({ where: { id } });
 
         if (!section) {
-            throw new SectionNotFoundException(id);
+            throw new SectionIdNotFoundException(id);
         }
 
         return new SectionResponse(section);
@@ -51,7 +52,7 @@ export class SectionService {
         const section = await this.sectionRepository.findOne({ where: { id }, relations: ['course'] });
 
         if (!section) {
-            throw new SectionNotFoundException(id);
+            throw new SectionIdNotFoundException(id);
         }
 
         return section;
@@ -83,56 +84,47 @@ export class SectionService {
     async updateSection(request: UpdateSectionRequest, id: number): Promise<SectionResponse> {
         const { title, order } = request;
 
-        if (!title && !order) {
-            throw new BadRequestException('At least one field must be provided');
-        }
-        
-        const section = await this.findSectionEntityById(id);
+        const targetSection = await this.findSectionEntityById(id);
 
-        if (title) {
-            section.title = title;
+        targetSection.title = title ?? targetSection.title;
+
+        if (order && order !== targetSection.order) {
+            await this.reorderSections(targetSection, order);
         }
 
-        if (order && order !== section.order) {
-            await this.reorderSections(section, order);
-            section.order = order;
-        }
-
-        const updatedSection = await this.sectionRepository.save(section);
+        const updatedSection = await this.sectionRepository.save(targetSection);
         return new SectionResponse(updatedSection);
     }
 
-    private async reorderSections(section: SectionEntity, newOrder: number): Promise<void> {
-        const courseId = section.course.id;
-        const oldOrder = section.order;
+    private async findSectionByOrder(courseId: number, order: number): Promise<SectionEntity> {
+        const section =  this.sectionRepository.findOne({ where: { course: { id: courseId }, order } });
+
+        if (!section) {
+            throw new SectionOrderNotFoundException(order);
+        }
+
+        return section;
+    }
+
+    private async reorderSections(targetSection: SectionEntity, newOrder: number): Promise<void> {
+        const courseId = targetSection.course.id;
+
         const maxOrder = await this.getLastSectionInCourse(courseId);
 
-        if ( newOrder > maxOrder) {
-            throw new BadRequestException(`New order must be less than or equal to ${maxOrder}`);
+        if (newOrder > maxOrder) {
+            throw new BadRequestException(`New order must be between 1 and ${maxOrder}`);
         }
 
-        const queryBuilder = this.sectionRepository.createQueryBuilder()
-            .update(SectionEntity);
+        const sectionToMove = targetSection; 
+        const sectionAtTargetPosition = await this.findSectionByOrder(courseId, newOrder);
 
-        if (oldOrder < newOrder) { 
-            queryBuilder
-                .set({ order: () => 'order - 1' })
-                .where('course_id = :courseId AND order > :oldOrder AND order <= :newOrder', {
-                    courseId,
-                    oldOrder,
-                    newOrder,
-                });
-        } else {
-            queryBuilder
-                .set({ order: () => 'order + 1' })
-                .where('course_id = :courseId AND order >= :newOrder AND order < :oldOrder', {
-                    courseId,
-                    oldOrder,
-                    newOrder,
-                });
-        }
+        await this.sectionRepository.manager.transaction(async (manager) => {
+            const tempOrder = sectionToMove.order;
+            sectionToMove.order = sectionAtTargetPosition.order;
+            sectionAtTargetPosition.order = tempOrder;
 
-        await queryBuilder.execute();
+            await manager.save([sectionToMove, sectionAtTargetPosition]);
+        });
     }
 }
 
