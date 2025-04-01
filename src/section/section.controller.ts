@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Put, Query, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Put, Query, Res } from '@nestjs/common';
 import { SectionService } from './section.service';
 import { CreateSectionRequest } from './request/create-section.request';
 import { Response } from 'express';
@@ -48,5 +48,12 @@ export class SectionController {
         return res.status(200).json({
             data: updatedSection,
         });
+    }
+
+    @Delete(':id')
+    async softDeleteSection(@isValidId() id: number, @Res() res: Response) {
+        await this.sectionService.softDeleteSection(id);
+
+        return res.status(204).send();
     }
 }
