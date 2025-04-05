@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SectionEntity } from './section.entity';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { CreateSectionRequest } from './request/create-section.request';
 import { CoursesService } from 'src/course/course.service';
 import { SectionAlreadyExistsException } from './exception/section-already-exists.exception';
@@ -124,6 +124,30 @@ export class SectionService {
             sectionAtTargetPosition.order = tempOrder;
 
             await manager.save([sectionToMove, sectionAtTargetPosition]);
+        });
+    }
+
+    async softDeleteSection(id: number): Promise<void> {
+        const section = await this.findSectionEntityById(id);
+
+        await this.sectionRepository.update(id, { deletedAt: new Date() });
+
+        await this.reorderSectionsOnDelete(section);
+    }
+
+    private async reorderSectionsOnDelete(section: SectionEntity): Promise<void> {
+        const courseId = section.course.id;
+    
+        await this.sectionRepository.manager.transaction(async (manager) => {
+            await manager
+                .createQueryBuilder()
+                .update(SectionEntity)
+                .set({ order: () => 'order - 1' })
+                .where('course_id = :courseId AND order > :order', {
+                    courseId,
+                    order: section.order,
+                })
+                .execute();
         });
     }
 }
