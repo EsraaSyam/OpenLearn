@@ -9,6 +9,7 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 import { CoursesModule } from './course/course.module';
 import { SectionModule } from './section/section.module';
+import { DropboxModule } from './dropbox/dropbox.module';
 
 @Module({
   imports: [
@@ -31,7 +32,7 @@ import { SectionModule } from './section/section.module';
       }),
       inject: [ConfigService],
     })
-    ,AuthModule, UserModule, CoursesModule, SectionModule],
+    ,AuthModule, UserModule, CoursesModule, SectionModule, DropboxModule],
   controllers: [AppController],
   providers: [AppService],
 })
