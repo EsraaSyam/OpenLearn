@@ -10,11 +10,17 @@ export class DropboxService {
     private clientId: string;
     private clientSecret: string;
     private tokenExpiry: Date;
+    private tokenUrl: string;
+    private uploadUrl: string;
+    private shareLinkUrl: string;
 
     constructor(private readonly configService: ConfigService) {
         this.refreshToken = this.configService.get<string>('DROPBOX_REFRESH_TOKEN');
         this.clientId = this.configService.get<string>('DROPBOX_CLIENT_ID');
         this.clientSecret = this.configService.get<string>('DROPBOX_CLIENT_SECRET');
+        this.tokenUrl = this.configService.get<string>('DROPBOX_TOKEN_URL');
+        this.uploadUrl = this.configService.get<string>('DROPBOX_UPLOAD_URL');
+        this.shareLinkUrl = this.configService.get<string>('DROPBOX_SHARE_LINK_URL');
 
         if (!this.refreshToken || !this.clientId || !this.clientSecret) {
             throw new InternalServerErrorException('Missing Dropbox configuration');
@@ -27,7 +33,7 @@ export class DropboxService {
         }
 
         try {
-            const response = await axios.post<DropboxTokenResponse>('https://api.dropboxapi.com/oauth2/token', null, {
+            const response = await axios.post<DropboxTokenResponse>(this.tokenUrl, null, {
                 params: {
                     grant_type: 'refresh_token',
                     refresh_token: this.refreshToken,
@@ -96,7 +102,7 @@ export class DropboxService {
         });
 
         try {
-            await axios.post('https://content.dropboxapi.com/2/files/upload', file.buffer, {
+            await axios.post(this.uploadUrl, file.buffer, {
                 headers,
             });
 
@@ -139,7 +145,7 @@ export class DropboxService {
         const accessToken = await this.getAccessToken();
 
         try {
-            const response = await axios.post<DropboxShareLinkResponse>('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
+            const response = await axios.post<DropboxShareLinkResponse>(this.shareLinkUrl, {
                 path,
                 settings: {
                     requested_visibility: 'public',

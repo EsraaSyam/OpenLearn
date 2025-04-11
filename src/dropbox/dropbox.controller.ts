@@ -8,12 +8,7 @@ export class DropboxController {
     constructor(
         private readonly dropboxService: DropboxService,
     ) {}
-
-    @Get('token')
-    async getAccessToken() {
-        return await this.dropboxService.getAccessToken();
-    }
-
+    
     @Post('upload')
     @UseInterceptors(FileInterceptor('file'))
     async uploadFile(@UploadedFile() file: Express.Multer.File, @Res() res: Response) {
