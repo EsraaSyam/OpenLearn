@@ -53,6 +53,10 @@ export class AuthService {
             throw new EmailNotFoundException();
         }
 
+        if (!user.password) {
+            throw new UnauthorizedException('User registered with Google, please login with Google or reset your password');
+        }
+
         const isPasswordMatches = await this.isPasswordMatches(data.password, user.password);
 
         if (!isPasswordMatches) {
