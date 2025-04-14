@@ -4,6 +4,7 @@ import { DropboxController } from './dropbox.controller';
 
 @Module({
   providers: [DropboxService],
-  controllers: [DropboxController]
+  controllers: [DropboxController],
+  exports: [DropboxService],
 })
 export class DropboxModule {}

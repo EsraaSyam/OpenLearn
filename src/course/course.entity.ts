@@ -11,6 +11,9 @@ export class CourseEntity {
     title: string;
 
     @Column()
+    uniqueTitle: string;
+
+    @Column()
     description: string;
 
     @Column({ type: "decimal"})
@@ -18,6 +21,9 @@ export class CourseEntity {
 
     @Column({ type: "enum", enum: DifficultyLevel })
     difficultyLevel: DifficultyLevel;
+
+    @Column()
+    coverUrl: string;
 
     @CreateDateColumn()
     createdAt: Date;
