@@ -2,6 +2,8 @@ import { BadRequestException, HttpException, Injectable, InternalServerErrorExce
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 import { DropboxShareLinkResponse, DropboxTokenResponse } from './dropbox.interface';
+import { GetFilePathRequest } from './request/get-file-path.request';
+import path from 'path';
 
 @Injectable()
 export class DropboxService {
@@ -13,6 +15,7 @@ export class DropboxService {
     private tokenUrl: string;
     private uploadUrl: string;
     private shareLinkUrl: string;
+    private deleteUrl: string;
 
     constructor(private readonly configService: ConfigService) {
         this.refreshToken = this.configService.get<string>('DROPBOX_REFRESH_TOKEN');
@@ -21,6 +24,7 @@ export class DropboxService {
         this.tokenUrl = this.configService.get<string>('DROPBOX_TOKEN_URL');
         this.uploadUrl = this.configService.get<string>('DROPBOX_UPLOAD_URL');
         this.shareLinkUrl = this.configService.get<string>('DROPBOX_SHARE_LINK_URL');
+        this.deleteUrl = this.configService.get<string>('DROPBOX_DELETE_URL');
 
         if (!this.refreshToken || !this.clientId || !this.clientSecret) {
             throw new InternalServerErrorException('Missing Dropbox configuration');
@@ -81,7 +85,7 @@ export class DropboxService {
             throw new InternalServerErrorException(`Dropbox error: ${message}`);
         }
 
-        throw new InternalServerErrorException(`Unexpected error: ${error.message}`); 
+        throw new InternalServerErrorException(`Unexpected error: ${error.message}`);
     }
 
 
@@ -160,6 +164,48 @@ export class DropboxService {
             });
 
             return response.data.url;
+        } catch (error) {
+            this.handleAxiosError(error);
+        }
+    }
+
+    private async getFilePathFromShareUrl(req: GetFilePathRequest): Promise<string> {
+        const { folderPath, shareUrl } = req;
+        try {
+            const url = new URL(shareUrl);
+            const pathname = url.pathname;
+            const fileName = pathname.split('/').pop();
+
+            if (!fileName || fileName.includes('?')) {
+                throw new BadRequestException('Invalid file name extracted from share URL');
+            }
+
+            const cleanFolderPath = folderPath.replace(/\/+$/, '');
+
+            return `/uploads/${cleanFolderPath}/${fileName}`;
+        } catch (error) {
+            throw new BadRequestException(`Invalid share URL: ${error.message}`);
+        }
+    }
+
+    async deleteFile(shareUrl: string, folderPath: string): Promise<void> {
+
+        const filePath = await this.getFilePathFromShareUrl({
+            folderPath,
+            shareUrl,
+        });
+        
+        try {
+            const headers = await this.getDropboxHeaders({
+                'Content-Type': 'application/json',
+            });
+
+            await axios.post(this.deleteUrl, {
+                path: filePath,
+            }, {
+                headers,
+            });
+
         } catch (error) {
             this.handleAxiosError(error);
         }

@@ -6,6 +6,8 @@ export class CourseResponse {
     price: number;
     createdAt: Date;
     updatedAt: Date;
+    coverUrl: string;
+    uniqueTitle: string;
 
 
     constructor(course: any) {
@@ -14,7 +16,9 @@ export class CourseResponse {
         this.description = course.description;
         this.difficultyLevel = course.difficultyLevel;
         this.price = course.price;
+        this.coverUrl = course.coverUrl;
         this.createdAt = course.createdAt;
         this.updatedAt = course.updatedAt;
+        this.uniqueTitle = course.uniqueTitle;
     }
 }
